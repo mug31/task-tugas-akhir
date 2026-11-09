@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Wireframe — task-tugas-akhir</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #ECECEC;
+    padding: 44px 48px 52px;
+    color: #2B2B2B;
+  }
+
+  .page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 4px; }
+  .page-sub { font-size: 12px; color: #777; margin-bottom: 32px; }
+
+  .board { display: flex; gap: 34px; align-items: flex-start; }
+  .col { width: 360px; flex: 0 0 360px; }
+
+  .frame-label { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; padding-left: 2px; }
+  .frame-no {
+    width: 20px; height: 20px; border-radius: 50%; background: #2B2B2B; color: #fff;
+    font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: 0 0 20px;
+  }
+  .frame-name { font-size: 13px; font-weight: 600; }
+  .frame-route {
+    font-size: 10.5px; color: #8A8A8A; font-family: ui-monospace, 'SF Mono', monospace; margin-left: auto;
+  }
+
+  .phone {
+    width: 360px; height: 760px; background: #fff; border: 2px solid #2B2B2B;
+    border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; position: relative;
+  }
+
+  .statusbar {
+    height: 26px; border-bottom: 1px solid #DADADA; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 14px; font-size: 9.5px; color: #999;
+    font-weight: 500; flex: 0 0 26px; background: #FAFAFA;
+  }
+
+  .appbar { padding: 14px 16px 12px; border-bottom: 1.5px solid #2B2B2B; background: #F4F4F4; }
+  .appbar-title { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+  .appbar-sub { font-size: 10.5px; color: #7A7A7A; margin-top: 3px; }
+  .appbar-row { display: flex; align-items: center; gap: 10px; }
+  .back {
+    width: 22px; height: 22px; border: 1.5px solid #2B2B2B; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: 0 0 22px;
+  }
+
+  .body { flex: 1; overflow: hidden; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .search {
+    height: 36px; border: 1.5px solid #B9B9B9; border-radius: 9px; display: flex;
+    align-items: center; gap: 8px; padding: 0 11px; font-size: 11px; color: #9A9A9A; background: #FBFBFB;
+  }
+  .search .ico {
+    width: 12px; height: 12px; border: 1.5px solid #9A9A9A; border-radius: 50%;
+    position: relative; flex: 0 0 12px;
+  }
+  .search .ico::after {
+    content: ''; position: absolute; width: 5px; height: 1.5px; background: #9A9A9A;
+    transform: rotate(45deg); right: -4px; bottom: 1px;
+  }
+
+  .chips { display: flex; gap: 6px; }
+  .chip {
+    font-size: 10px; padding: 5px 11px; border: 1.5px solid #C9C9C9; border-radius: 20px;
+    color: #777; white-space: nowrap;
+  }
+  .chip.active { background: #2B2B2B; border-color: #2B2B2B; color: #fff; font-weight: 600; }
+
+  .sec-label {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: #8C8C8C; margin-top: 2px;
+  }
+
+  .card { border: 1.5px solid #2B2B2B; border-radius: 11px; padding: 11px 12px; background: #fff; }
+  .card-top { display: flex; align-items: flex-start; gap: 8px; }
+  .card-title { font-size: 12px; font-weight: 600; line-height: 1.35; flex: 1; }
+
+  .badge {
+    font-size: 8.5px; font-weight: 700; padding: 3px 7px; border-radius: 5px;
+    border: 1.5px solid #2B2B2B; white-space: nowrap; flex: 0 0 auto;
+  }
+  .badge.fill { background: #2B2B2B; color: #fff; }
+
+  .card-meta { display: flex; align-items: center; gap: 6px; margin-top: 7px; font-size: 9.5px; color: #7D7D7D; }
+  .dot-sep { color: #C4C4C4; }
+
+  .bar { height: 4px; background: #E7E7E7; border-radius: 3px; margin-top: 9px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: #2B2B2B; }
+
+  .card-foot {
+    display: flex; align-items: center; justify-content: space-between; margin-top: 9px;
+    padding-top: 8px; border-top: 1px dashed #D8D8D8; font-size: 9px; color: #8C8C8C;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .label { font-size: 10px; font-weight: 600; color: #4A4A4A; }
+  .label .req { color: #2B2B2B; }
+  .input {
+    height: 38px; border: 1.5px solid #C9C9C9; border-radius: 8px; padding: 0 11px;
+    display: flex; align-items: center; font-size: 11px; color: #A0A0A0; background: #FBFBFB;
+  }
+  .input.tall { height: 64px; align-items: flex-start; padding-top: 10px; }
+  .input.err { border-color: #2B2B2B; border-style: dashed; }
+  .help { font-size: 9px; color: #8C8C8C; }
+  .help.err { color: #2B2B2B; font-weight: 600; }
+
+  .stepper { display: flex; gap: 6px; }
+  .step {
+    flex: 1; height: 34px; border: 1.5px solid #C9C9C9; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #8C8C8C; background: #FBFBFB;
+  }
+  .step.on { background: #2B2B2B; border-color: #2B2B2B; color: #fff; }
+
+  .btn {
+    height: 42px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; border: 1.5px solid #2B2B2B;
+  }
+  .btn.primary { background: #2B2B2B; color: #fff; }
+  .btn.ghost { background: #fff; color: #2B2B2B; }
+  .btn-row { display: flex; gap: 8px; }
+
+  .hero {
+    border: 1.5px solid #2B2B2B; border-radius: 11px; padding: 14px 12px;
+    background: repeating-linear-gradient(135deg, #FAFAFA, #FAFAFA 7px, #F1F1F1 7px, #F1F1F1 14px);
+  }
+  .countdown { display: flex; align-items: baseline; gap: 6px; }
+  .countdown .num { font-size: 34px; font-weight: 700; letter-spacing: -1px; }
+  .countdown .unit { font-size: 11px; color: #7A7A7A; }
+
+  .kv { display: flex; flex-direction: column; gap: 9px; }
+  .kv-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 8px; border-bottom: 1px dashed #DEDEDE; font-size: 10.5px;
+  }
+  .kv-row .k { color: #7A7A7A; }
+  .kv-row .v { font-weight: 600; }
+
+  .desc { font-size: 10.5px; line-height: 1.65; color: #6B6B6B; }
+  .desc .line { height: 6px; background: #EDEDED; border-radius: 3px; margin-bottom: 6px; }
+
+  .subj { border: 1.5px solid #2B2B2B; border-radius: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 11px; }
+  .swatch {
+    width: 30px; height: 30px; border-radius: 7px; border: 1.5px solid #2B2B2B; flex: 0 0 30px;
+    background: repeating-linear-gradient(45deg, #fff, #fff 3px, #E9E9E9 3px, #E9E9E9 6px);
+  }
+  .subj-name { font-size: 11.5px; font-weight: 600; }
+  .subj-sub { font-size: 9px; color: #8C8C8C; margin-top: 2px; }
+  .icon-btn {
+    width: 26px; height: 26px; border: 1.5px solid #C9C9C9; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; color: #7A7A7A; flex: 0 0 26px;
+  }
+
+  .navbar { height: 58px; border-top: 1.5px solid #2B2B2B; display: flex; background: #F4F4F4; flex: 0 0 58px; }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; font-size: 8.5px; color: #9C9C9C;
+  }
+  .nav-item.on { color: #2B2B2B; font-weight: 700; }
+  .nav-ico { width: 17px; height: 17px; border: 1.5px solid currentColor; border-radius: 4px; }
+  .nav-ico.circle { border-radius: 50%; }
+
+  .fab {
+    position: absolute; right: 16px; bottom: 72px; width: 50px; height: 50px; border-radius: 50%;
+    background: #2B2B2B; color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 300; border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.22);
+  }
+
+  .note {
+    margin-top: 14px; font-size: 10px; line-height: 1.6; color: #7A7A7A;
+    padding: 9px 11px; border-left: 2.5px solid #B5B5B5; background: #F7F7F7;
+  }
+  .note b { color: #4A4A4A; }
+  .note code { font-family: ui-monospace, 'SF Mono', monospace; font-size: 9.5px; color: #4A4A4A; }
+
+  .empty-state {
+    border: 1.5px dashed #C9C9C9; border-radius: 10px; padding: 22px 14px;
+    text-align: center; font-size: 10px; color: #9C9C9C; line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Wireframe Aplikasi — task-tugas-akhir</div>
+<div class="page-sub">UAS Praktikum Mobile Programming · Flutter · 4 halaman · skala 1:1 (360 × 760 dp)</div>
+
+<div class="board">
+
+  <!-- ============ 1. HOME ============ -->
+  <div class="col">
+    <div class="frame-label">
+      <div class="frame-no">1</div>
+      <div class="frame-name">Daftar Tugas</div>
+      <div class="frame-route">/</div>
+    </div>
+
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ᯤ ▰</span></div>
+
+      <div class="appbar">
+        <div class="appbar-title">Tugas Saya</div>
+        <div class="appbar-sub">6 tugas aktif · 2 mendesak</div>
+      </div>
+
+      <div class="body">
+        <div class="search">
+          <span class="ico"></span>
+          <span>Cari judul atau deskripsi tugas…</span>
+        </div>
+
+        <div class="chips">
+          <div class="chip active">Semua</div>
+          <div class="chip">Belum</div>
+          <div class="chip">Proses</div>
+          <div class="chip">Selesai</div>
+        </div>
+
+        <div class="sec-label">Prioritas tertinggi</div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-title">UAS Praktikum Mobile Programming</div>
+            <div class="badge fill">KRITIS</div>
+          </div>
+          <div class="card-meta">
+            <span>Mobile Programming</span>
+            <span class="dot-sep">·</span>
+            <span>2 SKS</span>
+            <span class="dot-sep">·</span>
+            <span>14 hari</span>
+          </div>
+          <div class="bar"><i style="width:88%"></i></div>
+          <div class="card-foot">
+            <span>Skor prioritas 0,71</span>
+            <span>Kesulitan 5/5</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-title">Kuis TOPSIS</div>
+            <div class="badge">DEKAT</div>
+          </div>
+          <div class="card-meta">
+            <span>Sistem Pendukung Keputusan</span>
+            <span class="dot-sep">·</span>
+            <span>3 SKS</span>
+            <span class="dot-sep">·</span>
+            <span>1 hari</span>
+          </div>
+          <div class="bar"><i style="width:64%"></i></div>
+          <div class="card-foot">
+            <span>Skor prioritas 0,60</span>
+            <span>Kesulitan 2/5</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-top">
+            <div class="card-title">Laporan Praktikum Modul 13</div>
+            <div class="badge">SANTAI</div>
+          </div>
+          <div class="card-meta">
+            <span>Mobile Programming</span>
+            <span class="dot-sep">·</span>
+            <span>2 SKS</span>
+            <span class="dot-sep">·</span>
+            <span>3 hari</span>
+          </div>
+          <div class="bar"><i style="width:22%"></i></div>
+          <div class="card-foot">
+            <span>Skor prioritas 0,20</span>
+            <span>Kesulitan 3/5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fab">+</div>
+
+      <div class="navbar">
+        <div class="nav-item on"><div class="nav-ico"></div><span>Tugas</span></div>
+        <div class="nav-item"><div class="nav-ico circle"></div><span>Mata Kuliah</span></div>
+        <div class="nav-item"><div class="nav-ico"></div><span>Profil</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Alur:</b> daftar dimuat lewat <code>GET /tugas</code>, lalu diurutkan di Flutter
+      berdasarkan skor prioritas. Saat memuat tampil spinner, saat gagal tampil pesan + tombol coba lagi.
+    </div>
+  </div>
+
+  <!-- ============ 2. FORM ============ -->
+  <div class="col">
+    <div class="frame-label">
+      <div class="frame-no">2</div>
+      <div class="frame-name">Form Tambah / Edit Tugas</div>
+      <div class="frame-route">/form</div>
+    </div>
+
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ᯤ ▰</span></div>
+
+      <div class="appbar">
+        <div class="appbar-row">
+          <div class="back">←</div>
+          <div>
+            <div class="appbar-title">Tambah Tugas</div>
+            <div class="appbar-sub">Isi data tugas baru</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="body" style="gap:11px;">
+        <div class="field">
+          <div class="label">Mata kuliah <span class="req">*</span></div>
+          <div class="input">▾ Pilih mata kuliah</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Judul tugas <span class="req">*</span></div>
+          <div class="input">Contoh: Laporan Praktikum Modul 13</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Deskripsi</div>
+          <div class="input tall">Keterangan singkat (opsional)…</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Deadline <span class="req">*</span></div>
+          <div class="input">📅 22 November 2026</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Tingkat kesulitan <span class="req">*</span></div>
+          <div class="stepper">
+            <div class="step">1</div>
+            <div class="step">2</div>
+            <div class="step">3</div>
+            <div class="step on">4</div>
+            <div class="step">5</div>
+          </div>
+          <div class="help">Skala 1 (mudah) sampai 5 (sangat sulit)</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Status</div>
+          <div class="chips">
+            <div class="chip active">Belum</div>
+            <div class="chip">Proses</div>
+            <div class="chip">Selesai</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Judul tugas <span class="req">*</span></div>
+          <div class="input err">Judul wajib diisi</div>
+          <div class="help err">▲ Contoh pesan validasi di bawah field</div>
+        </div>
+
+        <div class="btn-row" style="margin-top:2px;">
+          <div class="btn ghost" style="flex:1;">Batal</div>
+          <div class="btn primary" style="flex:2;">Simpan Tugas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Alur:</b> simpan baru → <code>POST /tugas</code>, ubah → <code>PUT /tugas/:id</code>.
+      Deadline masa lalu dan kesulitan di luar 1–5 ditolak sebelum dikirim ke server.
+    </div>
+  </div>
+
+  <!-- ============ 3. DETAIL ============ -->
+  <div class="col">
+    <div class="frame-label">
+      <div class="frame-no">3</div>
+      <div class="frame-name">Detail Tugas</div>
+      <div class="frame-route">/detail</div>
+    </div>
+
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ᯤ ▰</span></div>
+
+      <div class="appbar">
+        <div class="appbar-row">
+          <div class="back">←</div>
+          <div>
+            <div class="appbar-title">Detail Tugas</div>
+            <div class="appbar-sub">Data dikirim lewat arguments</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="hero">
+          <div class="countdown">
+            <span class="num">14</span>
+            <span class="unit">hari lagi</span>
+          </div>
+          <div class="card-meta" style="margin-top:6px;">
+            <span>Deadline 22 November 2026</span>
+          </div>
+        </div>
+
+        <div class="sec-label">Informasi</div>
+
+        <div class="kv">
+          <div class="kv-row"><span class="k">Mata kuliah</span><span class="v">Mobile Programming</span></div>
+          <div class="kv-row"><span class="k">Bobot SKS</span><span class="v">2 SKS</span></div>
+          <div class="kv-row"><span class="k">Kesulitan</span><span class="v">5 / 5</span></div>
+          <div class="kv-row"><span class="k">Skor prioritas</span><span class="v">0,71 · KRITIS</span></div>
+          <div class="kv-row" style="border-bottom:none;"><span class="k">Status</span><span class="v">Proses</span></div>
+        </div>
+
+        <div class="sec-label">Deskripsi</div>
+        <div class="desc">
+          <div class="line" style="width:100%"></div>
+          <div class="line" style="width:96%"></div>
+          <div class="line" style="width:88%"></div>
+          <div class="line" style="width:52%; margin-bottom:0;"></div>
+        </div>
+
+        <div class="chips" style="margin-top:4px;">
+          <div class="chip">Belum</div>
+          <div class="chip active">Proses</div>
+          <div class="chip">Selesai</div>
+        </div>
+
+        <div class="btn-row" style="margin-top:auto;">
+          <div class="btn ghost" style="flex:1;">Hapus</div>
+          <div class="btn primary" style="flex:1.6;">Ubah Tugas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Alur:</b> <code>GET /tugas/:id</code> untuk data lengkap. Ubah status cepat →
+      <code>PUT /tugas/:id/status</code>. Hapus → dialog konfirmasi → <code>DELETE /tugas/:id</code>.
+    </div>
+  </div>
+
+  <!-- ============ 4. MATA KULIAH ============ -->
+  <div class="col">
+    <div class="frame-label">
+      <div class="frame-no">4</div>
+      <div class="frame-name">Mata Kuliah</div>
+      <div class="frame-route">/mata-kuliah</div>
+    </div>
+
+    <div class="phone">
+      <div class="statusbar"><span>9:41</span><span>▮▮▮ ᯤ ▰</span></div>
+
+      <div class="appbar">
+        <div class="appbar-title">Mata Kuliah</div>
+        <div class="appbar-sub">3 mata kuliah · total 8 SKS</div>
+      </div>
+
+      <div class="body">
+        <div class="subj">
+          <div class="swatch"></div>
+          <div style="flex:1;">
+            <div class="subj-name">Praktikum Mobile Programming</div>
+            <div class="subj-sub">2 SKS · 2 tugas</div>
+          </div>
+          <div class="icon-btn">✎</div>
+          <div class="icon-btn">✕</div>
+        </div>
+
+        <div class="subj">
+          <div class="swatch"></div>
+          <div style="flex:1;">
+            <div class="subj-name">Sistem Pendukung Keputusan</div>
+            <div class="subj-sub">3 SKS · 2 tugas</div>
+          </div>
+          <div class="icon-btn">✎</div>
+          <div class="icon-btn">✕</div>
+        </div>
+
+        <div class="subj">
+          <div class="swatch"></div>
+          <div style="flex:1;">
+            <div class="subj-name">Basis Data Lanjut</div>
+            <div class="subj-sub">3 SKS · 1 tugas</div>
+          </div>
+          <div class="icon-btn">✎</div>
+          <div class="icon-btn">✕</div>
+        </div>
+
+        <div class="sec-label" style="margin-top:4px;">Tambah mata kuliah</div>
+
+        <div class="field">
+          <div class="label">Nama mata kuliah</div>
+          <div class="input">Contoh: Jaringan Komputer</div>
+        </div>
+
+        <div class="field">
+          <div class="label">Bobot SKS</div>
+          <div class="stepper">
+            <div class="step">1</div>
+            <div class="step on">2</div>
+            <div class="step">3</div>
+            <div class="step">4</div>
+            <div class="step">5</div>
+          </div>
+        </div>
+
+        <div class="empty-state" style="margin-top:auto;">
+          Menghapus mata kuliah akan menghapus<br>seluruh tugas di dalamnya.
+        </div>
+
+        <div class="btn primary">Simpan Mata Kuliah</div>
+      </div>
+
+      <div class="navbar">
+        <div class="nav-item"><div class="nav-ico"></div><span>Tugas</span></div>
+        <div class="nav-item on"><div class="nav-ico circle"></div><span>Mata Kuliah</span></div>
+        <div class="nav-item"><div class="nav-ico"></div><span>Profil</span></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Alur:</b> <code>GET</code> / <code>POST</code> / <code>PUT</code> / <code>DELETE /mata-kuliah</code>.
+      Nilai SKS di sini langsung memengaruhi skor prioritas setiap tugas.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
