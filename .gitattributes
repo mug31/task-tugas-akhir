@@ -1,0 +1,11 @@
+# Wireframe adalah gambar kerja untuk dokumentasi, bukan source code aplikasi.
+# Tanpa aturan ini GitHub menghitungnya sebagai HTML dan label bahasa repo
+# jadi "HTML 100%" padahal proyeknya Flutter/Dart.
+design/* linguist-documentation
+design/** linguist-documentation
+design/*.png linguist-documentation
+design/*.pdf linguist-documentation
+
+# Berkas hasil generator, jangan dihitung statistik bahasa.
+**/*.g.dart linguist-generated
+**/*.freezed.dart linguist-generated
