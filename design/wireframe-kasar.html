@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Wireframe kasar — task-tugas-akhir</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FDFCF7; }
+  /* kertas kotak-kotak, dibuat dengan CSS supaya ringan */
+  body {
+    background-image:
+      linear-gradient(to right, rgba(120,150,190,.20) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(120,150,190,.20) 1px, transparent 1px);
+    background-size: 24px 24px;
+    display: inline-block;
+  }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+<script>
+const W = 1620, H = 1150, S = 2;   // S = skala export
+
+const canvas = document.getElementById('c');
+canvas.width = W * S;
+canvas.height = H * S;
+canvas.style.width = W + 'px';
+canvas.style.height = H + 'px';
+
+const ctx = canvas.getContext('2d');
+ctx.scale(S, S);
+
+const rc = rough.canvas(canvas);
+// skala rough ikut canvas; buat helper dengan transform manual
+const rcS = {
+  rect: (x, y, w, h, o = {}) => rc.rectangle(x, y, w, h, o),
+  line: (x1, y1, x2, y2, o = {}) => rc.line(x1, y1, x2, y2, o),
+  circle: (x, y, d, o = {}) => rc.circle(x, y, d, o),
+};
+
+const INK   = '#2f2f2f';
+const SOFT  = '#6a6a6a';
+const RED   = '#c0392b';
+const PENCIL= { stroke: '#3a3a3a', strokeWidth: 1.6, roughness: 1.4, bowing: 1.2 };
+
+let seed = 1;
+const sk = (o = {}) => ({ ...PENCIL, seed: seed++, ...o });
+
+// ---------- helper ----------
+function box(x, y, w, h, o = {}) {
+  rcS.rect(x, y, w, h, sk({ stroke: '#3a3a3a', strokeWidth: 1.5, roughness: 1.3, ...o }));
+}
+function softbox(x, y, w, h, o = {}) {
+  rcS.rect(x, y, w, h, sk({ stroke: '#8c8c8c', strokeWidth: 1.2, roughness: 1.8, ...o }));
+}
+function ln(x1, y1, x2, y2, o = {}) {
+  rcS.line(x1, y1, x2, y2, sk({ stroke: '#5d5d5d', strokeWidth: 1.2, roughness: 1.6, ...o }));
+}
+// garis teks (placeholder tulisan)
+function txt(x, y, w, o = {}) {
+  ln(x, y, x + w, y - 1, { stroke: '#8f8f8f', strokeWidth: 1.1, roughness: 2.2, ...o });
+}
+function txtBlock(x, y, w, n, gap = 12) {
+  for (let i = 0; i < n; i++) {
+    const ww = i === n - 1 ? w * 0.55 : w * (0.92 + Math.random() * 0.08);
+    txt(x, y + i * gap, ww);
+  }
+}
+// kotak gambar dengan silang
+function imgBox(x, y, w, h, o = {}) {
+  softbox(x, y, w, h, o);
+  ln(x, y, x + w, y + h, { stroke: '#a8a8a8', strokeWidth: 1 });
+  ln(x + w, y, x, y + h, { stroke: '#a8a8a8', strokeWidth: 1 });
+}
+function label(str, x, y, size = 21, color = INK, weight = 600, align = 'left') {
+  ctx.save();
+  ctx.font = `${weight} ${size}px Caveat, cursive`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+function arrow(x1, y1, x2, y2, color = RED) {
+  const o = { stroke: color, strokeWidth: 1.6, roughness: 1.3, bowing: 1 };
+  rcS.line(x1, y1, x2, y2, sk(o));
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const a1 = ang + Math.PI * 0.82, a2 = ang - Math.PI * 0.82;
+  const L = 11;
+  rcS.line(x2, y2, x2 + Math.cos(a1) * L, y2 + Math.sin(a1) * L, sk(o));
+  rcS.line(x2, y2, x2 + Math.cos(a2) * L, y2 + Math.sin(a2) * L, sk(o));
+}
+
+// ---------- kerangka HP ----------
+const PW = 330, PH = 700, PY = 150;
+function frame(x, title, route) {
+  // bayangan tipis
+  ctx.save();
+  ctx.globalAlpha = .07;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(x + 6, PY + 7, PW, PH);
+  ctx.restore();
+
+  rcS.rect(x, PY, PW, PH, sk({ stroke: INK, strokeWidth: 2.4, roughness: .9, bowing: .6 }));
+  // status bar
+  ln(x + 10, PY + 24, x + PW - 10, PY + 24, { stroke: '#b5b5b5', strokeWidth: 1 });
+  txt(x + 12, PY + 17, 22);
+  txt(x + PW - 46, PY + 17, 34);
+
+  // app bar
+  ln(x + 4, PY + 78, x + PW - 4, PY + 78, { stroke: INK, strokeWidth: 1.4, roughness: 1 });
+
+  label(title, x + 14, PY + 58, 23);
+  label(route, x + PW - 12, PY + 58, 16, SOft(), 400, 'right');
+
+  function SOft() { return '#8a8a8a'; }
+
+  // bottom nav
+  ln(x + 4, PY + PH - 54, x + PW - 4, PY + PH - 54, { stroke: INK, strokeWidth: 1.4, roughness: 1 });
+  for (let i = 0; i < 3; i++) {
+    const cx = x + PW / 2 + (i - 1) * (PW / 3);
+    rcS.rect(cx - 8, PY + PH - 40, 16, 14, sk({ stroke: '#8d8d8d', strokeWidth: 1.1 }));
+    txt(cx - 16, PY + PH - 14, 32);
+  }
+  return { x, y: PY, w: PW, h: PH };
+}
+
+// ================= ISI HALAMAN =================
+
+// ---------- 1. DAFTAR TUGAS ----------
+function pageDaftar(x) {
+  const y = PY + 92;
+  // kolom pencarian
+  softbox(x + 14, y, PW - 28, 34);
+  rcS.circle(x + 32, y + 17, 11, sk({ stroke: '#9a9a9a', strokeWidth: 1 }));
+  txt(x + 46, y + 20, 140);
+
+  // chip filter
+  let cx = x + 14;
+  ['Semua', 'Belum', 'Proses', 'Selesai'].forEach((t, i) => {
+    const w = i === 0 ? 62 : 56;
+    if (i === 0) {
+      rcS.rect(cx, y + 46, w, 22, sk({ stroke: INK, strokeWidth: 1.5, fill: '#3a3a3a', fillStyle: 'solid' }));
+      label(t, cx + 12, y + 62, 17, '#f7f7f7', 700);
+    } else {
+      softbox(cx, y + 46, w, 22);
+      label(t, cx + 10, y + 62, 17, '#777', 400);
+    }
+    cx += w + 8;
+  });
+
+  // kartu tugas
+  let cy = y + 82;
+  const cards = [
+    { h: 92, badge: 'KRITIS' },
+    { h: 84, badge: 'DEKAT' },
+    { h: 84, badge: 'SANTAI' },
+  ];
+  cards.forEach((c, i) => {
+    box(x + 14, cy, PW - 28, c.h, { roughness: 1.7 });
+    // judul
+    txt(x + 26, cy + 22, 150 + (i % 2) * 20);
+    // badge
+    softbox(x + PW - 78, cy + 10, 52, 18, { roughness: 1.4 });
+    label(c.badge, x + PW - 72, cy + 24, 14, '#6d6d6d', 700);
+    // meta
+    txt(x + 26, cy + 40, 110);
+    txt(x + 150, cy + 40, 60);
+    txt(x + 226, cy + 40, 44);
+    // progress bar
+    softbox(x + 26, cy + 52, PW - 78, 6, { roughness: 2.2 });
+    ln(x + 26, cy + 55, x + 26 + (PW - 78) * (0.85 - i * 0.3), cy + 55,
+       { stroke: '#3a3a3a', strokeWidth: 3.4, roughness: 1 });
+    // footer
+    ln(x + 26, cy + c.h - 20, x + PW - 26, cy + c.h - 20, { stroke: '#cfcfcf', strokeWidth: 1 });
+    txt(x + 26, cy + c.h - 8, 84);
+    txt(x + PW - 130, cy + c.h - 8, 90);
+    cy += c.h + 12;
+  });
+
+  // FAB
+  rcS.circle(x + PW - 46, PY + PH - 96, 44,
+    sk({ stroke: INK, strokeWidth: 2, fill: '#3a3a3a', fillStyle: 'solid' }));
+  label('+', x + PW - 46, PY + PH - 84, 30, '#fafafa', 400, 'center');
+}
+
+// ---------- 2. FORM ----------
+function pageForm(x) {
+  const y = PY + 92;
+  // tombol kembali
+  softbox(x + 14, y - 4, 26, 22);
+  label('←', x + 21, y + 8, 18, '#666');
+
+  let cy = y + 34;
+  const rows = [
+    { label: 'Mata kuliah', h: 32, drop: true },
+    { label: 'Judul tugas', h: 32 },
+    { label: 'Deskripsi', h: 54 },
+    { label: 'Deadline', h: 32, cal: true },
+  ];
+  rows.forEach((r) => {
+    label(r.label, x + 16, cy, 16, '#5f5f5f', 400);
+    softbox(x + 14, cy + 6, PW - 28, r.h);
+    txt(x + 26, cy + 6 + 22, 130);
+    if (r.drop) label('▾', x + PW - 40, cy + 30, 15, '#999');
+    if (r.cal)  label('[]', x + 26, cy + 30, 13, '#999');
+    cy += 6 + r.h + 22;
+  });
+
+  // stepper kesulitan
+  label('Tingkat kesulitan', x + 16, cy, 16, '#5f5f5f', 400);
+  let sx = x + 14;
+  for (let i = 1; i <= 5; i++) {
+    const w = (PW - 28 - 4 * 7) / 5;
+    if (i === 4) {
+      rcS.rect(sx, cy + 8, w, 28, sk({ stroke: INK, strokeWidth: 1.6, fill: '#3a3a3a', fillStyle: 'solid' }));
+      label(String(i), sx + w / 2, cy + 28, 15, '#fafafa', 700, 'center');
+    } else {
+      softbox(sx, cy + 8, w, 28);
+      label(String(i), sx + w / 2, cy + 28, 15, '#888', 400, 'center');
+    }
+    sx += w + 7;
+  }
+  cy += 56;
+
+  // status
+  label('Status', x + 16, cy, 16, '#5f5f5f', 400);
+  let bx = x + 14;
+  ['Belum', 'Proses', 'Selesai'].forEach((t, i) => {
+    const w = 68;
+    if (i === 0) {
+      rcS.rect(bx, cy + 8, w, 22, sk({ stroke: INK, strokeWidth: 1.4, fill: '#3a3a3a', fillStyle: 'solid' }));
+      label(t, bx + 12, cy + 24, 16, '#fafafa', 600);
+    } else { softbox(bx, cy + 8, w, 22); label(t, bx + 10, cy + 24, 16, '#888', 400); }
+    bx += w + 8;
+  });
+  cy += 48;
+
+  // field error
+  label('Judul tugas', x + 16, cy, 16, '#5f5f5f', 400);
+  rcS.rect(x + 14, cy + 6, PW - 28, 30,
+    sk({ stroke: '#b94a3c', strokeWidth: 1.4, roughness: 2, strokeLineDash: [5, 4] }));
+  label('judul wajib diisi', x + 26, cy + 27, 15, '#b94a3c', 400);
+
+  // tombol
+  const by = PY + PH - 108;
+  softbox(x + 14, by, 96, 34);
+  label('Batal', x + 14 + 48, by + 23, 18, '#6d6d6d', 600, 'center');
+  rcS.rect(x + 118, by, PW - 132, 34,
+    sk({ stroke: INK, strokeWidth: 1.8, fill: '#3a3a3a', fillStyle: 'solid' }));
+  label('Simpan', x + 118 + (PW - 132) / 2, by + 23, 18, '#fafafa', 700, 'center');
+}
+
+// ---------- 3. DETAIL ----------
+function pageDetail(x) {
+  const y = PY + 92;
+  softbox(x + 14, y - 4, 26, 22);
+  label('←', x + 21, y + 8, 18, '#666');
+
+  // kartu countdown
+  box(x + 14, y + 28, PW - 28, 84, { roughness: 1.9 });
+  for (let i = 0; i < 26; i++) {
+    ln(x + 18 + i * 11, y + 32, x + 18 + i * 11, y + 108,
+       { stroke: '#efefef', strokeWidth: 1, roughness: 0 });
+  }
+  label('14', x + 30, y + 78, 40, INK, 700);
+  label('hari lagi', x + 78, y + 76, 20, '#6d6d6d', 400);
+  label('deadline 22 Nov 2026', x + 30, y + 98, 16, '#8a8a8a', 400);
+
+  // daftar info
+  let cy = y + 134;
+  for (let i = 0; i < 5; i++) {
+    txt(x + 16, cy, 84);
+    txt(x + PW - 130, cy, 116);
+    ln(x + 16, cy + 10, x + PW - 16, cy + 10, { stroke: '#e0e0e0', strokeWidth: 1 });
+    cy += 26;
+  }
+
+  // deskripsi
+  label('Deskripsi', x + 16, cy + 6, 16, '#5f5f5f', 400);
+  txtBlock(x + 16, cy + 22, PW - 32, 4, 13);
+
+  // tombol
+  const by = PY + PH - 108;
+  softbox(x + 14, by, 96, 34);
+  label('Hapus', x + 14 + 48, by + 23, 18, '#6d6d6d', 600, 'center');
+  rcS.rect(x + 118, by, PW - 132, 34,
+    sk({ stroke: INK, strokeWidth: 1.8, fill: '#3a3a3a', fillStyle: 'solid' }));
+  label('Ubah', x + 118 + (PW - 132) / 2, by + 23, 18, '#fafafa', 700, 'center');
+}
+
+// ---------- 4. MATA KULIAH ----------
+function pageMatkul(x) {
+  const y = PY + 92;
+
+  let cy = y;
+  for (let i = 0; i < 3; i++) {
+    box(x + 14, cy, PW - 28, 52, { roughness: 1.6 });
+    // swatch warna
+    rcS.rect(x + 24, cy + 12, 26, 26,
+      sk({ stroke: '#5d5d5d', strokeWidth: 1.2, fill: '#e8e8e8', fillStyle: 'hachure', hachureGap: 4 }));
+    txt(x + 60, cy + 22, 128);
+    txt(x + 60, cy + 38, 70);
+    softbox(x + PW - 74, cy + 16, 22, 20);
+    label('✎', x + PW - 68, cy + 31, 15, '#777');
+    softbox(x + PW - 46, cy + 16, 22, 20);
+    label('✕', x + PW - 40, cy + 31, 14, '#777');
+    cy += 64;
+  }
+
+  label('Tambah mata kuliah', x + 16, cy + 8, 17, '#5f5f5f', 600);
+  cy += 20;
+  softbox(x + 14, cy, PW - 28, 30);
+  txt(x + 26, cy + 20, 120);
+  cy += 44;
+
+  let sx = x + 14;
+  for (let i = 1; i <= 5; i++) {
+    const w = (PW - 28 - 4 * 7) / 5;
+    if (i === 2) {
+      rcS.rect(sx, cy, w, 28, sk({ stroke: INK, strokeWidth: 1.6, fill: '#3a3a3a', fillStyle: 'solid' }));
+      label(String(i), sx + w / 2, cy + 20, 15, '#fafafa', 700, 'center');
+    } else {
+      softbox(sx, cy, w, 28);
+      label(String(i), sx + w / 2, cy + 20, 15, '#888', 400, 'center');
+    }
+    sx += w + 7;
+  }
+
+  // catatan peringatan
+  const wy = PY + PH - 132;
+  rcS.rect(x + 14, wy, PW - 28, 44,
+    sk({ stroke: '#b94a3c', strokeWidth: 1.3, roughness: 2, strokeLineDash: [4, 4] }));
+  label('hapus matkul =', x + 26, wy + 18, 16, '#b94a3c', 400);
+  label('tugasnya ikut kehapus', x + 26, wy + 36, 16, '#b94a3c', 400);
+
+  const by = PY + PH - 80;
+  rcS.rect(x + 14, by, PW - 28, 34,
+    sk({ stroke: INK, strokeWidth: 1.8, fill: '#3a3a3a', fillStyle: 'solid' }));
+  label('Simpan', x + PW / 2, by + 23, 18, '#fafafa', 700, 'center');
+}
+
+// penanda merah bernomor: bulatan kecil + legenda di bawah, tanpa panah
+// panjang supaya tidak ada garis yang saling bersilangan.
+function marker(x, y, n) {
+  rcS.circle(x, y, 26, sk({ stroke: RED, strokeWidth: 1.7, fill: '#fff', fillStyle: 'solid', roughness: 1.2 }));
+  rcS.circle(x, y, 26, sk({ stroke: RED, strokeWidth: 1.2, roughness: 2.2 }));
+  label(String(n), x, y + 7, 19, RED, 700, 'center');
+}
+
+function legend(x, y, items, lineGap = 26) {
+  items.forEach((t, i) => {
+    label(t, x, y + i * lineGap, 19, RED, 400);
+  });
+}
+
+// ================= GAMBAR =================
+async function draw() {
+  await document.fonts.load('600 23px Caveat');
+  await document.fonts.load('400 16px Caveat');
+  await document.fonts.load('700 40px Caveat');
+  await document.fonts.ready;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // judul
+  label('wireframe kasar — task-tugas-akhir', 40, 62, 40, INK, 700);
+  label('UAS Praktikum Mobile Programming  ·  Flutter  ·  4 halaman  ·  skala 1:1', 42, 92, 20, '#7a7a7a', 400);
+  ln(38, 104, 700, 103, { stroke: RED, strokeWidth: 2, roughness: 1.4 });
+
+  const gap = 45;
+  const x0 = (W - (PW * 4 + gap * 3)) / 2;
+  const xs = [0, 1, 2, 3].map(i => x0 + i * (PW + gap));
+
+  // nomor + nama halaman di atas tiap frame
+  const titles = ['Daftar Tugas', 'Form Tugas', 'Detail Tugas', 'Mata Kuliah'];
+  const routes = ['/', '/form', '/detail', '/mata-kuliah'];
+  xs.forEach((x, i) => {
+    rcS.circle(x + 11, PY - 26, 22, sk({ stroke: INK, strokeWidth: 1.8, fill: '#3a3a3a', fillStyle: 'solid' }));
+    label(String(i + 1), x + 11, PY - 19, 17, '#fafafa', 700, 'center');
+    label(titles[i], x + 30, PY - 19, 24, INK, 700);
+  });
+
+  frame(xs[0], '', '');
+  frame(xs[1], '', '');
+  frame(xs[2], '', '');
+  frame(xs[3], '', '');
+
+  // judul di dalam appbar ditulis manual (posisi beda tiap halaman)
+  label('Tugas Saya', xs[0] + 14, PY + 58, 23);
+  label('Tambah Tugas', xs[1] + 52, PY + 58, 23);
+  label('Detail', xs[2] + 52, PY + 58, 23);
+  label('Mata Kuliah', xs[3] + 14, PY + 58, 23);
+
+  pageDaftar(xs[0]);
+  pageForm(xs[1]);
+  pageDetail(xs[2]);
+  pageMatkul(xs[3]);
+
+  // ---------- penanda merah bernomor ----------
+  // Halaman 1
+  marker(xs[0] + PW - 46, PY + PH - 190, 1);   // FAB
+  marker(xs[0] + 150, PY + 178, 2);            // search + filter
+  marker(xs[0] + 60, PY + 262, 3);             // kartu prioritas
+
+  // Halaman 2
+  marker(xs[1] + 210, PY + 214, 4);            // dropdown matkul
+  marker(xs[1] + 200, PY + 508, 5);            // stepper kesulitan
+  marker(xs[1] + 200, PY + 640, 6);            // validasi
+  marker(xs[1] + PW - 46, PY + PH - 118, 7);    // tombol simpan
+
+  // Halaman 3
+  marker(xs[2] + 150, PY + 152, 8);            // countdown
+  marker(xs[2] + 60, PY + 300, 9);             // tabel info
+  marker(xs[2] + PW - 46, PY + PH - 118, 10);  // hapus / ubah
+
+  // Halaman 4
+  marker(xs[3] + 250, PY + 140, 11);           // baris matkul
+  marker(xs[3] + 250, PY + 250, 12);           // SKS
+  marker(xs[3] + 60, PY + PH - 150, 13);       // peringatan cascade
+
+  // ---------- legenda ----------
+  const ly = PY + PH + 44;
+
+  legend(xs[0] + 2, ly, [
+    '1  tombol tambah tugas',
+    '2  cari judul + filter status',
+    '3  kartu diurut skor prioritas',
+  ]);
+
+  legend(xs[1] + 2, ly, [
+    '4  pilih mata kuliah',
+    '5  kesulitan 1–5',
+    '6  pesan validasi',
+    '7  POST / PUT /tugas',
+  ]);
+
+  legend(xs[2] + 2, ly, [
+    '8  countdown sisa hari',
+    '9  detail dari GET /tugas/:id',
+    '10  hapus (DELETE) / ubah (PUT)',
+  ]);
+
+  legend(xs[3] + 2, ly, [
+    '11  CRUD /mata-kuliah',
+    '12  SKS dipakai di rumus skor',
+    '13  hapus matkul = hapus tugasnya',
+  ]);
+
+  // catatan kanan atas
+  label('skor = (sks × kesulitan) / sisa hari', W - 40, 62, 22, RED, 400, 'right');
+  label('dihitung di Flutter, bukan di DB', W - 40, 88, 19, RED, 400, 'right');
+}
+
+draw();
+</script>
+</body>
+</html>
