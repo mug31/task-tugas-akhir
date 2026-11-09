@@ -21,14 +21,114 @@ skor = (sks × kesulitan) / sisa_hari
 Skor dihitung di sisi Flutter (bukan disimpan di database) karena `sisa_hari` berubah
 setiap hari. Semakin besar skor, semakin mendesak tugas tersebut.
 
-## Fitur
+## Rancangan antarmuka
 
-- CRUD tugas dan CRUD mata kuliah melalui REST API
-- Daftar tugas terurut otomatis berdasarkan skor prioritas
-- Badge status urgensi: kritis / dekat / santai
-- Countdown sisa hari menuju deadline
-- Form tambah/edit dengan validasi input
-- Penanganan state loading, error, dan retry
+Wireframe sketsa tangan, 4 halaman, skala 1:1 (360 × 760 dp).
+Berkas sumber: [`design/wireframe-kasar.html`](design/wireframe-kasar.html) —
+render satu lembar dengan `design/wireframe-kasar@2x.png`.
+
+<table>
+<tr>
+<td width="300" valign="top"><img src="design/p1.png" width="280" alt="Wireframe halaman daftar tugas"></td>
+<td valign="top">
+
+**1. Daftar Tugas** — `/`
+
+Halaman utama yang langsung menjawab pertanyaan "kerjain yang mana dulu?".
+
+- Kolom cari menyaring judul dan deskripsi tugas.
+- Chip filter memilih status: semua, belum, proses, selesai.
+- Kartu tugas diurutkan menurun berdasarkan skor prioritas, bukan tanggal.
+- Tiap kartu memuat nama mata kuliah, bobot SKS, sisa hari, tingkat kesulitan,
+  serta badge urgensi: **KRITIS**, **DEKAT**, atau **SANTAI**.
+- Bar tipis di bawah judul menunjukkan besaran skor secara visual.
+- Tombol `+` membuka form tambah tugas.
+- Navigasi bawah berpindah antara Tugas, Mata Kuliah, dan Profil.
+
+Data: `GET /tugas` (mendukung `?q=` dan `?status=`).
+
+</td>
+</tr>
+
+<tr>
+<td width="300" valign="top"><img src="design/p2.png" width="280" alt="Wireframe halaman form tugas"></td>
+<td valign="top">
+
+**2. Tambah / Ubah Tugas** — `/form`
+
+Satu halaman dipakai untuk dua keperluan: menambah tugas baru dan mengubah tugas lama.
+
+- Mata kuliah dipilih dari daftar yang sudah ada, tidak diketik bebas,
+  supaya bobot SKS-nya pasti ikut terbaca.
+- Judul wajib diisi, deskripsi opsional.
+- Deadline diambil lewat pemilih tanggal sehingga formatnya seragam.
+- Tingkat kesulitan memakai tombol 1–5, bukan kolom teks, agar nilai di luar
+  rentang tidak mungkin masuk.
+- Status dipilih lewat chip.
+- Setiap kolom punya pesan kesalahan sendiri di bawahnya. Contoh pada gambar
+  adalah keadaan ketika judul dikosongkan.
+
+Data: `POST /tugas` untuk data baru, `PUT /tugas/:id` untuk perubahan.
+
+</td>
+</tr>
+
+<tr>
+<td width="300" valign="top"><img src="design/p3.png" width="280" alt="Wireframe halaman detail tugas"></td>
+<td valign="top">
+
+**3. Detail Tugas** — `/detail`
+
+Dibuka dengan menekan salah satu kartu di halaman daftar.
+
+- Angka besar di atas adalah sisa hari menuju deadline, dihitung ulang setiap
+  halaman dibuka.
+- Tabel informasi memuat mata kuliah, bobot SKS, kesulitan, skor prioritas
+  beserta kategorinya, dan status terkini.
+- Deskripsi ditampilkan penuh.
+- Status bisa diganti langsung dari sini tanpa membuka form.
+- Tombol hapus meminta konfirmasi lebih dulu, karena tindakan ini tidak bisa
+  dibatalkan.
+
+Data: `GET /tugas/:id` untuk isi halaman, `PUT /tugas/:id/status` untuk ganti
+status cepat, `DELETE /tugas/:id` untuk hapus.
+
+</td>
+</tr>
+
+<tr>
+<td width="300" valign="top"><img src="design/p4.png" width="280" alt="Wireframe halaman mata kuliah"></td>
+<td valign="top">
+
+**4. Mata Kuliah** — `/mata-kuliah`
+
+Halaman pendukung. Bobot SKS yang diisi di sini adalah salah satu pembilang pada
+rumus prioritas, jadi data mata kuliah harus benar lebih dulu.
+
+- Daftar mata kuliah beserta jumlah tugas yang menempel padanya.
+- Tiap baris bisa diubah atau dihapus.
+- Form tambah berisi nama dan bobot SKS 1–6.
+- Menghapus mata kuliah ikut menghapus seluruh tugas di dalamnya
+  (`ON DELETE CASCADE`), karena itu ada peringatan sebelum tombol simpan.
+
+Data: `GET` / `POST` / `PUT` / `DELETE /mata-kuliah`.
+
+</td>
+</tr>
+</table>
+
+## Alur halaman
+
+```
+Daftar Tugas ──tap kartu──> Detail Tugas ──tombol ubah──> Form (mode edit)
+     │                                                          ▲
+     └──tombol +──> Form (mode tambah) ─────────────────────────┘
+     │
+     └──navigasi bawah──> Mata Kuliah
+```
+
+Navigasi memakai named route, dan halaman Detail menerima `id` tugas lewat
+`arguments` — sesuai pola Modul 08.
 
 ## Pemetaan ke modul praktikum
 
