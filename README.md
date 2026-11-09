@@ -3,23 +3,84 @@
 Aplikasi mobile Flutter untuk memantau dan memprioritaskan tugas perkuliahan
 berdasarkan bobot mata kuliah, tingkat kesulitan, dan sisa waktu menuju deadline.
 
+> **Masalah yang diselesaikan:** mahasiswa tidak kekurangan daftar tugas. Yang tidak ada
+> adalah cara menentukan mana yang harus dikerjakan lebih dulu — karena deadline terdekat
+> belum tentu yang paling penting.
+
 Dibuat untuk memenuhi **UAS Praktikum Mobile Programming**.
 
-## Latar belakang
+## Masalah
 
-Tugas kuliah datang bersamaan dari banyak mata kuliah dengan deadline yang berdekatan.
-Daftar tugas biasa (to-do list) hanya menampilkan apa yang harus dikerjakan tanpa memberi
-tahu mana yang paling mendesak. Aplikasi ini menghitung skor prioritas setiap tugas
-sehingga mahasiswa tahu urutan pengerjaan yang paling masuk akal.
+> **Mahasiswa tidak kekurangan daftar tugas — yang tidak ada adalah cara menentukan
+> mana yang harus dikerjakan lebih dulu.**
 
-## Rumus prioritas
+Tugas dari beberapa mata kuliah datang hampir bersamaan dengan deadline yang berdekatan.
+Aplikasi to-do list biasa hanya menampilkan daftar itu apa adanya, urut sesuai waktu
+ditambahkan atau sesuai tanggal deadline. Akibatnya:
+
+- **Deadline terdekat belum tentu yang paling penting.** Tugas ringan dari mata kuliah
+  2 SKS bisa menutupi tugas berat dari mata kuliah 4 SKS yang sebenarnya lebih menentukan
+  nilai.
+- **Yang paling mendesak justru sering terlewat**, karena yang paling dekat tanggalnya
+  belum tentu yang paling besar bobotnya.
+- **Mahasiswa mengerjakan berdasarkan urutan yang terasa mendesak**, bukan yang terukur.
+  Keputusan diambil pakai perasaan, bukan angka.
+
+### Sasaran pengguna
+
+| | |
+| --- | --- |
+| **Siapa** | Mahasiswa aktif yang mengambil 5–8 mata kuliah per semester |
+| **Kondisi** | Menerima tugas dari banyak mata kuliah dengan deadline berdekatan |
+| **Kebiasaan sekarang** | Mencatat di buku, Google Tasks, atau grup WhatsApp — semuanya berupa daftar tanpa bobot |
+| **Yang dibutuhkan** | Urutan pengerjaan yang bisa dipertanggungjawabkan, bukan sekadar daftar |
+| **Kemampuan teknis** | Terbiasa aplikasi mobile sehari-hari, tidak perlu dipandu |
+
+## Solusi dan korelasinya dengan masalah
+
+Aplikasi ini tidak menambah satu daftar tugas lagi. Yang ditambahkan adalah **satu angka
+yang menjawab "kerjakan yang mana dulu"**, dihitung dari tiga hal yang menentukan
+mendesak atau tidaknya sebuah tugas:
 
 ```
 skor = (sks × kesulitan) / sisa_hari
 ```
 
+| Masalah | Yang dipakai di rumus | Akibatnya pada daftar tugas |
+| --- | --- | --- |
+| Deadline terdekat belum tentu paling penting | `sks` — bobot mata kuliah | Tugas dari mata kuliah berbobot besar naik peringkat, tidak tenggelam oleh tugas ringan |
+| Kesulitan tidak pernah diperhitungkan | `kesulitan` (1–5) — diisi saat membuat tugas | Tugas yang butuh usaha lebih didahulukan meski deadline-nya masih agak jauh |
+| Yang mendesak sering terlewat | `sisa_hari` — pembagi | Semakin dekat deadline, skor naik. Sisa 1 hari mengalahkan sisa 14 hari |
+| Urutan ditentukan perasaan | Diurutkan menurun berdasarkan skor | Urutan bisa dijelaskan: "ini di atas karena SKS-nya besar dan sisanya 2 hari" |
+
+Konsekuensi yang perlu disadari: **rumus ini menempatkan urgensi di atas kemudahan.**
+Tugas ringan yang harus selesai besok tetap masuk kategori dekat, tapi tugas berat yang
+deadline-nya dua minggu bisa berada di atasnya. Itu memang disengaja — yang dicari bukan
+"apa yang bisa cepat selesai", melainkan "apa yang paling mahal kalau terlewat".
+
 Skor dihitung di sisi Flutter (bukan disimpan di database) karena `sisa_hari` berubah
-setiap hari. Semakin besar skor, semakin mendesak tugas tersebut.
+setiap hari. Kalau disimpan, nilainya akan basi setiap tengah malam dan butuh proses
+pembaruan tersendiri.
+
+Setiap kartu tugas menampilkan skornya sebagai badge **KRITIS / DEKAT / SANTAI**, sehingga
+keputusan bisa diambil tanpa membuka halaman detail lebih dulu.
+
+Angka skor dari rumus ini **tidak dibatasi 0–1** — tugas dengan sisa 1 hari bisa bernilai 6,
+tugas dengan sisa 14 hari bernilai 0,71. Karena itu badge tidak memakai ambang absolut,
+melainkan perbandingan terhadap skor tertinggi di daftar saat itu:
+
+| Badge | Syarat | Artinya |
+| --- | --- | --- |
+| **KRITIS** | skor ≥ 60% dari skor tertinggi | Mengerjakan hal lain lebih dulu berisiko kehilangan nilai besar |
+| **DEKAT** | 25% – 59% | Perlu masuk rencana minggu ini |
+| **SANTAI** | < 25% | Masih aman, tapi jangan sampai lupa |
+
+Dua hal teknis yang harus ditangani di kode:
+
+- **Sisa hari bisa nol** kalau deadline-nya hari ini. Pembagian dengan nol menghasilkan
+  `Infinity`, jadi `sisa_hari` dibatasi minimal 1 sebelum dipakai.
+- **Daftar kosong atau satu tugas** membuat "skor tertinggi" tidak bermakna sebagai
+  pembanding. Untuk kasus itu badge dihitung langsung dari sisa hari, bukan dari rasio.
 
 ## Rancangan antarmuka
 
