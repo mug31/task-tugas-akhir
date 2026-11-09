@@ -28,7 +28,7 @@ ditambahkan atau sesuai tanggal deadline. Akibatnya:
 
 ### Sasaran pengguna
 
-| | |
+| Aspek | Keterangan |
 | --- | --- |
 | **Siapa** | Mahasiswa aktif yang mengambil 5–8 mata kuliah per semester |
 | **Kondisi** | Menerima tugas dari banyak mata kuliah dengan deadline berdekatan |
